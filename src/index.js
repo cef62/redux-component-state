@@ -1,3 +1,7 @@
-export function add(x, y) {
-  return x + y;
-}
+import reduxComponentStateStore from './componentStateStore';
+import reduxComponentState from './componentState';
+
+export default reduxComponentState;
+export {
+  reduxComponentStateStore
+};

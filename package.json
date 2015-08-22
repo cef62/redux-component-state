@@ -43,9 +43,15 @@
     "mocha": "2.2.5",
     "rimraf": "2.3.4",
     "webpack": "1.9.6",
-    "webpack-dev-server": "1.8.2"
+    "webpack-dev-server": "1.8.2",
+    "react": "^0.13.3",
+    "redux": "^1.0.0"
   },
   "dependencies": {
     "invariant": "2.0.0"
+  },
+  "peerDependencies": {
+    "react": "^0.13.3",
+    "redux": "^1.0.0 || 1.0.0-rc"
   }
 }

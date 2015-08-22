@@ -8,24 +8,23 @@ const initialState = {
   interactionCount: 0
 };
 
-function update({value, interactionCount}, {value: valueModifier}){
-  interactionCount++;
-  value = value + valueModifier;
-  return { value, interactionCount };
+function update({value, interactionCount}, action) {
+  const newInteractionCount = interactionCount + 1;
+  const newValue = value + action.value;
+  return { value: newValue, interactionCount: newInteractionCount };
 }
 
 export default function(state = initialState, action) {
-  switch(action.type) {
+  let newState;
+  switch (action.type) {
 
     case INCREMENT:
-      return update(state, action);
-      break;
-
     case DECREMENT:
-      return update(state, action);
+      newState = update(state, action);
       break;
 
     default:
-      return state;
+      newState = state;
   }
+  return newState;
 }

@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react';
 
 import reduxComponentState from 'redux-component-state';
 
@@ -19,18 +19,15 @@ class CounterPanel extends Component {
   static defaultProps = {}
 
   render() {
-    const {
-      increment, decrement,
-      counter: { value, interactionCount }
-    } = this.props;
+    const { increment, decrement } = this.props;
 
     return (
         <div>
-          Current Count: {value} <br/>
-          Number of interactions: {interactionCount}
+          Current Count: {this.props.counter.value} <br/>
+          Number of interactions: {this.props.counter.interactionCount}
           <br/>
-          <button onClick={ e => increment() }>increment</button>
-          <button onClick={ e => decrement() }>decrement</button>
+          <button onClick={ () => increment() }>increment</button>
+          <button onClick={ () => decrement() }>decrement</button>
         </div>
     );
   }

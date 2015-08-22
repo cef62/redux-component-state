@@ -10,9 +10,9 @@ export function increment(multiplier = 1) {
   };
 }
 
-export function decrement(multiplier = 1){
+export function decrement(multiplier = 1) {
   return {
-    type: INCREMENT,
+    type: DECREMENT,
     value: (-multiplier)
   };
 }

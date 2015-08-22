@@ -80,11 +80,11 @@ function createComponentStateDecorator(componentStoreConfig) {
       // Internal API
       // ****************************************************************
 
-      getComponentStateKey(){
+      getComponentStateKey() {
         return componentStoreConfig.getKey(this.props);
       }
 
-      getComponentStoreState(){
+      getComponentStoreState() {
         return this.context.store.componentState.getState(this.getComponentStateKey());
       }
 
@@ -114,15 +114,7 @@ function createComponentStateDecorator(componentStoreConfig) {
 
         // FIXME: temporary fix because first render of the component fires
         // before the component store is initialized
-        if(!this.state) return <span />;
-        
-        // const renderDecoratedComp = () =>
-        //     <DecoratedComponent
-        //         dispatch={this.dispatchLocal}
-        //         {...this.stuff}
-        //         {...this.state}
-        //         {...boundActionCreators}
-        //     />;
+        if (!this.state) return <span />;
 
         return (
             <div>
@@ -135,7 +127,7 @@ function createComponentStateDecorator(componentStoreConfig) {
             </div>
         );
       }
-    }
+    };
 }
 
 

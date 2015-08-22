@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react';
 
 import { createStore, combineReducers, compose } from 'redux';
 import { Provider } from 'react-redux';

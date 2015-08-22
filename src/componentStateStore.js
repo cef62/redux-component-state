@@ -8,6 +8,8 @@ import {
   LOCAL_KEY
 } from './actionTypes';
 
+import invariant from 'invariant';
+
 export default function createComponentStateStore(next) {
   // map of component state subscribers
   let subscribersMap = {};
@@ -60,10 +62,10 @@ export default function createComponentStateStore(next) {
     // target stored state manager object
     let stateManager = subscribersMap[key];
 
-    if (stateManager && !shared) {
-      throw new Error(`Illegal Operation - ComponentState HoS for key: ${key} is not shareable!
-          Try to set 'shared' field in the store configuration.`);
-    }
+    invariant( !(stateManager && !shared),
+        `Illegal Operation - ComponentState HoS for key: ${key} is not shareable!
+        Try to set 'shared' field in the store configuration.`
+        );
 
     // init component state for given key
     if (!stateManager) {

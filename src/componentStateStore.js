@@ -127,8 +127,8 @@ export default function createComponentStateStore(next) {
       store.dispatch({
         type: STATE_ACTION,
         subType: MOUNT,
-        state: initialState,
-        key: storeKey
+        key: storeKey,
+        state: initialState
       });
     }
 
@@ -152,7 +152,8 @@ export default function createComponentStateStore(next) {
    *  type: {required} {string},
    *  subType: {required} {string},
    *  state: {optional} {object} pre-composed state to map to the component
-   *          state, used to component state mounting,
+   *          state, used to override initial component state mounting default
+   *          value
    *  data: {required for subtype === ACTION } original action submitted
    * }
    */

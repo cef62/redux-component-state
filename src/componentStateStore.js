@@ -40,6 +40,19 @@ export default function createComponentStateStore(next) {
   }
 
   // ****************************************************************
+  // dispatch method for component state actions
+  // ****************************************************************
+
+  function dispatch(key, action) {
+    return store.dispatch({
+      type: STATE_ACTION,
+      subType: ACTION,
+      key: key,
+      data: action
+    });
+  }
+
+  // ****************************************************************
   // unsubscribe method,
   // passed upon the subscription
   // ****************************************************************
@@ -114,6 +127,7 @@ export default function createComponentStateStore(next) {
     // return unsuscriber function
     return {
       storeKey,
+      dispatch,
       unsubscribe: unsubscribe.bind(null, storeKey, uid)
     };
   }

@@ -2,12 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import {
-  STATE_ACTION,
-  ACTION
-} from './actionTypes';
-
-// TODO: move in an utilities module
 function getDisplayName(Comp) {
   return Comp.displayName || Comp.name || 'Component';
 }
@@ -70,6 +64,7 @@ export default function reduxComponentState(componentStoreConfig) {
         });
         this.unsubscribe = subscription.unsubscribe;
         this.storeKey = subscription.storeKey;
+        this.dispatch = subscription.dispatch;
 
         // REACT-REDUX CONNECT
         function mapStateToProps(state) {
@@ -87,12 +82,7 @@ export default function reduxComponentState(componentStoreConfig) {
       // ****************************************************************
 
       dispatchLocal = (action) => {
-        this.context.store.dispatch({
-          type: STATE_ACTION,
-          subType: ACTION,
-          key: this.storeKey,
-          data: action
-        });
+        return this.dispatch(this.storeKey, action);
       }
 
       // ****************************************************************

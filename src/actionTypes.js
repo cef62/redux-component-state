@@ -1,6 +1,6 @@
-export const LOCAL = 'redux-component-state/local';
-export const LOCAL_MOUNT = 'redux-component-state/localMount';
-export const LOCAL_UNMOUNT = 'redux-component-state/localUnmount';
-export const LOCAL_INIT = 'redux-component-state/localInit';
-export const LOCAL_ACTION = 'redux-component-state/localAction';
-export const LOCAL_KEY = 'redux-component-state/';
+export const STATE_ACTION = 'redux-cs/state';
+export const MOUNT = 'redux-cs/mount';
+export const UNMOUNT = 'redux-cs/unmount';
+export const INIT = 'redux-cs/init';
+export const ACTION = 'redux-cs/action';
+export const KEY = 'redux-cs/';

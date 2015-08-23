@@ -1,11 +1,11 @@
 import combineReducers from 'redux/lib/utils/combineReducers';
 import {
-  LOCAL,
-  LOCAL_INIT,
-  LOCAL_MOUNT,
-  LOCAL_UNMOUNT,
-  LOCAL_ACTION,
-  LOCAL_KEY
+  STATE_ACTION,
+  INIT,
+  MOUNT,
+  UNMOUNT,
+  ACTION,
+  KEY
 } from './actionTypes';
 
 import invariant from 'invariant';
@@ -32,12 +32,11 @@ export default function createComponentStateStore(next) {
 
   function getStateKey({key}) {
     // key = (typeof key === 'string') ? key : key.key;
-    return LOCAL_KEY + key;
+    return KEY + key;
   }
 
   function getState(key) {
-    let stateKey = getStateKey({key});
-    return store.getState()[stateKey];
+    return store.getState()[key];
   }
 
   // ****************************************************************
@@ -49,7 +48,7 @@ export default function createComponentStateStore(next) {
     // if no more subscriber are available, clear the temporary store
     if (subscribersMap[key].subscribers.length === 1) {
       // unmount the component store
-      store.dispatch({ type: LOCAL, subType: LOCAL_UNMOUNT, key });
+      store.dispatch({ type: STATE_ACTION, subType: UNMOUNT, key });
       // clear subscriber data
       delete subscribersMap[key];
       return;
@@ -105,8 +104,8 @@ export default function createComponentStateStore(next) {
     // if the subsribed component state is new, mount it on the redux store
     if (!getState(storeKey)) {
       store.dispatch({
-        type: LOCAL,
-        subType: LOCAL_MOUNT,
+        type: STATE_ACTION,
+        subType: MOUNT,
         state: initialState,
         key: storeKey
       });
@@ -132,21 +131,21 @@ export default function createComponentStateStore(next) {
    *  subType: {required} {string},
    *  state: {optional} {object} pre-composed state to map to the component
    *          state, used to component state mounting,
-   *  data: {required for subtype === LOCAL_ACTION } original action submitted
+   *  data: {required for subtype === ACTION } original action submitted
    * }
    */
   const reactions = {
-    [LOCAL_MOUNT]: (state, action, reducer) => {
-      state[action.key] = action.state || reducer(undefined, { type: LOCAL_INIT });
+    [MOUNT]: (state, action, reducer) => {
+      state[action.key] = action.state || reducer(undefined, { type: INIT });
       return state;
     },
 
-    [LOCAL_UNMOUNT]: (state, action) => {
+    [UNMOUNT]: (state, action) => {
       delete state[action.key];
       return state;
     },
 
-    [LOCAL_ACTION]: (state, action, reducer) => {
+    [ACTION]: (state, action, reducer) => {
       state[action.key] = reducer(state[action.key], action.data);
       return state;
     }
@@ -168,13 +167,13 @@ export default function createComponentStateStore(next) {
       const newState = reducer(state, action);
 
       // test if the action received is bound to a component state
-      if (type === LOCAL && subscribersMap[ key ]) {
+      if (type === STATE_ACTION && subscribersMap[ key ]) {
         // react properly to component state actions
         let reaction = reactions[subType] || ( (currentState) => currentState );
         reaction(tmpState, action, subscribersMap[key].reducer);
       }
 
-      if (type === LOCAL && tmpState[key]) {
+      if (type === STATE_ACTION && tmpState[key]) {
         newState[key] = tmpState[key];
       }
       return newState;

@@ -3,8 +3,8 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 import {
-  LOCAL,
-  LOCAL_ACTION
+  STATE_ACTION,
+  ACTION
 } from './actionTypes';
 
 // TODO: move in an utilities module
@@ -88,8 +88,8 @@ export default function reduxComponentState(componentStoreConfig) {
 
       dispatchLocal = (action) => {
         this.context.store.dispatch({
-          type: LOCAL,
-          subType: LOCAL_ACTION,
+          type: STATE_ACTION,
+          subType: ACTION,
           key: this.storeKey,
           data: action
         });

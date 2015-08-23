@@ -31,7 +31,6 @@ export default function createComponentStateStore(next) {
   // ****************************************************************
 
   function getStateKey({key}) {
-    // key = (typeof key === 'string') ? key : key.key;
     return KEY + key;
   }
 
@@ -219,8 +218,12 @@ export default function createComponentStateStore(next) {
       replaceReducer: (reducerFunc) => store.replaceReducer(componentStateReducer(reducerFunc)),
       componentState: {
         subscribe,
+        // TODO: unsubscribe and getState are useles as is
+        // improve them to be used for specific contexts or remove them
+        // from here
         unsubscribe,
         getState
+        // TODO: may be usefull expose dispatch here?
       }
     };
   };

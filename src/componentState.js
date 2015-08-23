@@ -54,7 +54,6 @@ export default function reduxComponentState(componentStoreConfig) {
         const {
           getKey,
           reducers,
-          actions,
           getInitialState,
           shared
         } = componentStoreConfig;

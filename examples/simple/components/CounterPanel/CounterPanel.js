@@ -8,8 +8,7 @@ import counter from './redux/counterReducer';
 class CounterPanel extends Component {
 
   static propTypes = {
-    increment: PropTypes.func.isRequired,
-    decrement: PropTypes.func.isRequired,
+    compActions: PropTypes.object.isRequired,
     counter: PropTypes.shape({
       value: PropTypes.number.isRequired,
       interactionCount: PropTypes.number.isRequired
@@ -19,7 +18,8 @@ class CounterPanel extends Component {
   static defaultProps = {}
 
   render() {
-    const { increment, decrement } = this.props;
+    const {compActions} = this.props;
+    const {increment, decrement} = compActions;
 
     return (
         <div>
@@ -38,7 +38,10 @@ const componentStateConfig = {
     let id = props.id || 'defaultCounterPanel';
     return `counter-${id}`;
   },
-  reducers: { counter },
-  actions
+  reducers: {counter},
+  actions: {
+    map: actions,
+    aggregate: 'compActions'
+  }
 };
 export default reduxComponentState(componentStateConfig)(CounterPanel);

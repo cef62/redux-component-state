@@ -32,9 +32,13 @@ export default function reduxComponentState(componentStoreConfig) {
       //   componentStoreConfig: PropTypes.shape({
       //     getKey: PropTypes.func,
       //     reducers: PropTypes.object,
-      //     actions: PropTypes.object,
       //     getInitialState: PropTypes.func,
-      //     shared: PropTypes.bool
+      //     shared: PropTypes.bool,
+      //
+      //     actions: Proptypes.shape( {
+      //        aggregate: Proptypes.string,
+      //        map: PropTypes.object
+      //     })
       //   }).isRequired
       // };
 
@@ -90,18 +94,37 @@ export default function reduxComponentState(componentStoreConfig) {
       // ****************************************************************
 
       render() {
-        const { ...stuff } = this.props;
-        let actions = componentStoreConfig.actions || {};
-        const boundActionCreators = bindActionCreators(actions, this.dispatchLocal);
+        const {...stuff} = this.props;
+        const {actions = {} } = componentStoreConfig;
+        const {aggregate, map} = actions;
 
-        return (
-            <this.reduxConnectWrapper
-                ref="ReduxComponentStateWrapper"
-                dispatch={this.dispatchLocal}
-                {...this.stuff}
-                {...boundActionCreators}
-            />
-        );
+        let boundActionCreators;
+        if (map) {
+          boundActionCreators = bindActionCreators(map, this.dispatchLocal);
+        }
+
+        return this.composeChild(
+            stuff,
+            this.dispatchLocal,
+            boundActionCreators,
+            aggregate
+            );
+      }
+
+      composeChild(stuff, dispatch, actions, aggregate) {
+        let childProps = {
+          ...stuff,
+          ref: 'ReduxComponentStateWrapper',
+          dispatch
+        };
+
+        if (actions && aggregate) {
+          childProps[aggregate] = actions;
+        } else {
+          childProps = Object.assign( childProps, actions );
+        }
+
+        return React.createElement(this.reduxConnectWrapper, childProps);
       }
     };
 }

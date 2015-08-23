@@ -60,7 +60,7 @@ export default function createComponentStateStore(next) {
   function unsubscribe(key, uid) {
     // if no more subscriber are available, clear the temporary store
     if (subscribersMap[key].subscribers.length === 1) {
-      if(!subscribersMap[key].shared) {
+      if (!subscribersMap[key].shared) {
         // TODO: print a warning only in dev mode to warn that a component
         // state persist
         return;
@@ -92,7 +92,7 @@ export default function createComponentStateStore(next) {
     // target stored state manager object
     let stateManager = subscribersMap[storeKey];
 
-    if(stateManager){
+    if (stateManager) {
       invariant(stateManager.shared,
           `Illegal Operation - ComponentState HoS for key: ${key} is not shareable!
           Try to set 'shared' field in the store configuration.`

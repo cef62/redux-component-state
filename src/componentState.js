@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+
 import {
   LOCAL,
   LOCAL_ACTION
@@ -10,9 +12,8 @@ function getDisplayName(Comp) {
   return Comp.displayName || Comp.name || 'Component';
 }
 
-function createComponentStateDecorator(componentStoreConfig) {
+export default function reduxComponentState(componentStoreConfig) {
   // TODO: add validation of shape fo the storeConfig
-
   return (DecoratedComponent) =>
     class ReduxComponentState extends Component {
 
@@ -45,14 +46,13 @@ function createComponentStateDecorator(componentStoreConfig) {
 
       constructor(props, context) {
         super(props, context);
-        this.state = this.getComponentStoreState();
       }
 
       // ****************************************************************
       // Component LifeCycle
       // ****************************************************************
 
-      componentDidMount() {
+      componentWillMount() {
         const {
           getKey,
           reducers,
@@ -62,14 +62,20 @@ function createComponentStateDecorator(componentStoreConfig) {
         } = componentStoreConfig;
 
         let initialState = (getInitialState || (() => undefined))(this.props);
-        this.unsubscribe = this.context.store.componentState.subscribe({
+        let subscription = this.context.store.componentState.subscribe({
           key: getKey(this.props),
           reducers,
           initialState,
-          shared,
-          onChange: this.handleChange
+          shared
         });
-        this.handleChange();
+        this.unsubscribe = subscription.unsubscribe;
+        this.storeKey = subscription.storeKey;
+
+        // REACT-REDUX CONNECT
+        function mapStateToProps(state) {
+          return {...state[subscription.storeKey]};
+        }
+        this.reduxConnectWrapper = connect(mapStateToProps)(DecoratedComponent);
       }
 
       componentWillUnmount() {
@@ -80,25 +86,11 @@ function createComponentStateDecorator(componentStoreConfig) {
       // Internal API
       // ****************************************************************
 
-      getComponentStateKey() {
-        return componentStoreConfig.getKey(this.props);
-      }
-
-      getComponentStoreState() {
-        return this.context.store.componentState.getState(this.getComponentStateKey());
-      }
-
-      handleChange = () => {
-        // TODO: add conditions to prevent rendering if the
-        // state is not changed
-        this.setState(this.getComponentStoreState());
-      }
-
       dispatchLocal = (action) => {
         this.context.store.dispatch({
           type: LOCAL,
           subType: LOCAL_ACTION,
-          key: this.getComponentStateKey(),
+          key: this.storeKey,
           data: action
         });
       }
@@ -112,28 +104,14 @@ function createComponentStateDecorator(componentStoreConfig) {
         let actions = componentStoreConfig.actions || {};
         const boundActionCreators = bindActionCreators(actions, this.dispatchLocal);
 
-        // FIXME: temporary fix because first render of the component fires
-        // before the component store is initialized
-        if (!this.state) return <span />;
-
         return (
-            <div>
-            <DecoratedComponent ref="ReduxComponentStateWrapper"
+            <this.reduxConnectWrapper
+                ref="ReduxComponentStateWrapper"
                 dispatch={this.dispatchLocal}
                 {...this.stuff}
-                {...this.state}
                 {...boundActionCreators}
             />
-            </div>
         );
       }
     };
-}
-
-
-export default function reduxComponentState(componentStoreConfig) {
-  const decorator = createComponentStateDecorator(componentStoreConfig);
-  // TODO: is required this intermediate function?
-  // there's need to manipulate the decorator here?
-  return decorator;
 }

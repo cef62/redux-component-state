@@ -17,6 +17,13 @@ export default function createComponentStateStore(next) {
   // redux store
   let store;
 
+  // get random alphanumeric string
+  function randomUid(length) {
+    return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length)))
+      .toString(36)
+      .slice(1);
+  }
+
   // ****************************************************************
   // getState method,
   // the state is sliced with only the specific component state of
@@ -38,7 +45,7 @@ export default function createComponentStateStore(next) {
   // passed upon the subscription
   // ****************************************************************
 
-  function unsubscribe(key, onChange) {
+  function unsubscribe(key, uid) {
     // if no more subscriber are available, clear the temporary store
     if (subscribersMap[key].subscribers.length === 1) {
       // unmount the component store
@@ -49,7 +56,9 @@ export default function createComponentStateStore(next) {
     }
 
     // remove unsubscriber from subscriber map
-    subscribersMap[key].subscribers = subscribersMap[key].subscribers.filter((fn) => fn !== onChange);
+    subscribersMap[key].subscribers = subscribersMap[key]
+      .subscribers
+      .filter((fn) => fn !== uid);
   }
 
   // ****************************************************************
@@ -57,11 +66,15 @@ export default function createComponentStateStore(next) {
   // passed to children via `store context`
   // ****************************************************************
 
-  function subscribe({ key, reducers, onChange, shared, initialState }) {
-    // TODO: add default values and error management
-    // target stored state manager object
-    let stateManager = subscribersMap[key];
+  function subscribe({ key, reducers, shared, initialState }) {
+    // compose unique store-key
+    let storeKey = getStateKey({key});
 
+    // target stored state manager object
+    let stateManager = subscribersMap[storeKey];
+
+    // invariant not correct, shared should be stored and confrented from first
+    // creation!!!
     invariant( !(stateManager && !shared),
         `Illegal Operation - ComponentState HoS for key: ${key} is not shareable!
         Try to set 'shared' field in the store configuration.`
@@ -69,28 +82,41 @@ export default function createComponentStateStore(next) {
 
     // init component state for given key
     if (!stateManager) {
-      stateManager = subscribersMap[key] = {
+      stateManager = subscribersMap[storeKey] = {
         reducersObj: {},
         subscribers: [],
         reducer: null
       };
     }
 
+    // create random uid for subscriber
+    let uid = randomUid(36);
+
     // add subscriber listener to the list
-    stateManager.subscribers.push(onChange);
+    stateManager.subscribers.push(uid);
+
     // merge existent reducers with the new received in a map of available
     // reducers
     stateManager.reducersObj = { ...stateManager.reducersObj, ...reducers };
+
     // create redux reducer function
     stateManager.reducer = combineReducers(stateManager.reducersObj);
 
     // if the subsribed component state is new, mount it on the redux store
-    if (!getState(key)) {
-      store.dispatch({ type: LOCAL, subType: LOCAL_MOUNT, state: initialState, key });
+    if (!getState(storeKey)) {
+      store.dispatch({
+        type: LOCAL,
+        subType: LOCAL_MOUNT,
+        state: initialState,
+        key: storeKey
+      });
     }
 
     // return unsuscriber function
-    return unsubscribe.bind(null, key, onChange);
+    return {
+      storeKey,
+      unsubscribe: unsubscribe.bind(null, storeKey, uid)
+    };
   }
 
   // ****************************************************************
@@ -111,17 +137,17 @@ export default function createComponentStateStore(next) {
    */
   const reactions = {
     [LOCAL_MOUNT]: (state, action, reducer) => {
-      state[getStateKey(action)] = action.state || reducer(undefined, { type: LOCAL_INIT });
+      state[action.key] = action.state || reducer(undefined, { type: LOCAL_INIT });
       return state;
     },
 
     [LOCAL_UNMOUNT]: (state, action) => {
-      delete state[getStateKey(action)];
+      delete state[action.key];
       return state;
     },
 
     [LOCAL_ACTION]: (state, action, reducer) => {
-      state[getStateKey(action)] = reducer(state[getStateKey(action)], action.data);
+      state[action.key] = reducer(state[action.key], action.data);
       return state;
     }
   };
@@ -130,32 +156,26 @@ export default function createComponentStateStore(next) {
     // `reducer` is the received original redux store reducer function
     // return reducer method signature
     return (state, action) => {
+      const { key, type, subType } = action;
+
       // create temporary state to be processed by specific component state
       // reducers
       let tmpState = {
-        [getStateKey(action)]: (state || {})[getStateKey(action)] || {}
+        [key]: (state || {})[key] || {}
       };
 
       // process action with the original reducer
       const newState = reducer(state, action);
 
-      // TODO: move the component state reducer to its own function?
       // test if the action received is bound to a component state
-      if (action.type === LOCAL && subscribersMap[ action.key ]) {
+      if (type === LOCAL && subscribersMap[ key ]) {
         // react properly to component state actions
-        let reaction = reactions[action.subType] || ( (currentState) => currentState );
-        reaction(tmpState, action, subscribersMap[action.key].reducer);
-
-        // wait the completion of current stack trace before notify the
-        // subscriber. Required to permit completion of current execution stack
-        setTimeout(function notifySubscriber() {
-          if (subscribersMap[action.key]) {
-            subscribersMap[action.key].subscribers.forEach((fn) => fn());
-          }
-        });
+        let reaction = reactions[subType] || ( (currentState) => currentState );
+        reaction(tmpState, action, subscribersMap[key].reducer);
       }
-      if (tmpState[getStateKey(action)]) {
-        newState[getStateKey(action)] = tmpState[getStateKey(action)];
+
+      if (type === LOCAL && tmpState[key]) {
+        newState[key] = tmpState[key];
       }
       return newState;
     };

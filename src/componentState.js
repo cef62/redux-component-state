@@ -24,14 +24,14 @@ export default function reduxComponentState(componentStoreConfig) {
         })
       };
 
+      // ****************************************************************
+      // Component LifeCycle
+      // ****************************************************************
+
       constructor(props, context) {
         super(props, context);
         this.dispatchLocal = this.dispatchLocal.bind(this);
       }
-
-      // ****************************************************************
-      // Component LifeCycle
-      // ****************************************************************
 
       componentWillMount() {
         const {getKey, reducers, getInitialState} = componentStoreConfig;

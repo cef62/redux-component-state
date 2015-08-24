@@ -17,13 +17,6 @@ export default function createComponentStateStore(next) {
   // redux store
   let store;
 
-  // get random alphanumeric string
-  function randomUid(length) {
-    return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length)))
-      .toString(36)
-      .slice(1);
-  }
-
   // ****************************************************************
   // getState method,
   // the state is sliced with only the specific component state of
@@ -32,10 +25,6 @@ export default function createComponentStateStore(next) {
 
   function getStateKey(key) {
     return KEY + key;
-  }
-
-  function getState(key) {
-    return store.getState()[key];
   }
 
   // ****************************************************************
@@ -131,31 +120,33 @@ export default function createComponentStateStore(next) {
     }
   };
 
+  function applyComponentStateReducers(action, state, newState) {
+    const { key, type, subType } = action;
+    const reducer = subscribersMap[key];
+
+    // test if the action received is bound to a component state
+    if (type === STATE_ACTION && reducer) {
+      // create temporary state to be processed by specific component state
+      // reducers
+      let tmpState = { [key]: (state || {})[key] || {} };
+
+      // react properly to component state actions
+      let reaction = reactions[subType] || ( (cs) => cs );
+      reaction(tmpState, action, reducer);
+
+      newState[key] = tmpState[key];
+    }
+
+    return newState;
+  }
+
   function componentStateReducer(reducer) {
     // `reducer` is the received original redux store reducer function
     // return reducer method signature
     return (state, action) => {
-      const { key, type, subType } = action;
-
-      // create temporary state to be processed by specific component state
-      // reducers
-      let tmpState = {
-        [key]: (state || {})[key] || {}
-      };
-
       // process action with the original reducer
-      const newState = reducer(state, action);
-
-      // test if the action received is bound to a component state
-      if (type === STATE_ACTION && subscribersMap[ key ]) {
-        // react properly to component state actions
-        let reaction = reactions[subType] || ( (currentState) => currentState );
-        reaction(tmpState, action, subscribersMap[key]);
-      }
-
-      if (type === STATE_ACTION && tmpState[key]) {
-        newState[key] = tmpState[key];
-      }
+      let newState = reducer(state, action);
+      newState = applyComponentStateReducers(action, state, newState);
       return newState;
     };
   }

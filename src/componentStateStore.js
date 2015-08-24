@@ -62,13 +62,12 @@ export default function createComponentStateStore(next) {
 
       // clear subscriber data
       delete subscribersMap[key];
-      return;
+    } else {
+      // remove unsubscriber from subscriber map
+      subscribersMap[key].subscribers = subscribersMap[key]
+       .subscribers
+       .filter((fn) => fn !== uid);
     }
-
-    // remove unsubscriber from subscriber map
-    subscribersMap[key].subscribers = subscribersMap[key]
-      .subscribers
-      .filter((fn) => fn !== uid);
   }
 
   // ****************************************************************
@@ -201,13 +200,7 @@ export default function createComponentStateStore(next) {
       ...store,
       replaceReducer: (reducerFunc) => store.replaceReducer(componentStateReducer(reducerFunc)),
       componentState: {
-        subscribe,
-        // TODO: unsubscribe and getState are useles as is
-        // improve them to be used for specific contexts or remove them
-        // from here
-        unsubscribe,
-        getState
-        // TODO: may be usefull expose dispatch here?
+        subscribe
       }
     };
   };

@@ -9,6 +9,7 @@ import {
 } from './actionTypes';
 
 import invariant from 'invariant';
+import validateSubscription from './utils/validateSubscription';
 
 export default function createComponentStateStore(next) {
   // map of component state subscribers
@@ -58,7 +59,11 @@ export default function createComponentStateStore(next) {
   // passed to children via `store context`
   // ****************************************************************
 
-  function subscribe({ key, reducers, initialState }) {
+  function subscribe(subscription) {
+    validateSubscription(subscription);
+
+    const { key, reducers, initialState } = subscription;
+
     // compose unique store-key
     let storeKey = getStateKey(key);
 

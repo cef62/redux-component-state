@@ -8,8 +8,6 @@ import {
   KEY
 } from './actionTypes';
 
-import invariant from 'invariant';
-
 export default function createComponentStateStore(next) {
   // map of component state subscribers
   let subscribersMap = {};
@@ -59,12 +57,6 @@ export default function createComponentStateStore(next) {
   function unsubscribe(key, uid) {
     // if no more subscriber are available, clear the temporary store
     if (subscribersMap[key].subscribers.length === 1) {
-      if (!subscribersMap[key].shared) {
-        // TODO: print a warning only in dev mode to warn that a component
-        // state persist
-        return;
-      }
-
       // unmount the component store
       store.dispatch({ type: STATE_ACTION, subType: UNMOUNT, key });
 
@@ -84,27 +76,19 @@ export default function createComponentStateStore(next) {
   // passed to children via `store context`
   // ****************************************************************
 
-  function subscribe({ key, reducers, shared, initialState }) {
+  function subscribe({ key, reducers, initialState }) {
     // compose unique store-key
     let storeKey = getStateKey({key});
 
     // target stored state manager object
     let stateManager = subscribersMap[storeKey];
 
-    if (stateManager) {
-      invariant(stateManager.shared,
-          `Illegal Operation - ComponentState HoS for key: ${key} is not shareable!
-          Try to set 'shared' field in the store configuration.`
-          );
-    }
-
     // init component state for given key
     if (!stateManager) {
       stateManager = subscribersMap[storeKey] = {
         reducersObj: {},
         subscribers: [],
-        reducer: null,
-        shared
+        reducer: null
       };
     }
 

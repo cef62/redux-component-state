@@ -8,6 +8,8 @@ import {
   KEY
 } from './actionTypes';
 
+import invariant from 'invariant';
+
 export default function createComponentStateStore(next) {
   // map of component state subscribers
   let subscribersMap = {};
@@ -28,7 +30,7 @@ export default function createComponentStateStore(next) {
   // the subscriber
   // ****************************************************************
 
-  function getStateKey({key}) {
+  function getStateKey(key) {
     return KEY + key;
   }
 
@@ -54,20 +56,12 @@ export default function createComponentStateStore(next) {
   // passed upon the subscription
   // ****************************************************************
 
-  function unsubscribe(key, uid) {
-    // if no more subscriber are available, clear the temporary store
-    if (subscribersMap[key].subscribers.length === 1) {
-      // unmount the component store
-      store.dispatch({ type: STATE_ACTION, subType: UNMOUNT, key });
+  function unsubscribe(key) {
+    // unmount the component store
+    store.dispatch({ type: STATE_ACTION, subType: UNMOUNT, key });
 
-      // clear subscriber data
-      delete subscribersMap[key];
-    } else {
-      // remove unsubscriber from subscriber map
-      subscribersMap[key].subscribers = subscribersMap[key]
-       .subscribers
-       .filter((fn) => fn !== uid);
-    }
+    // clear subscriber data
+    Reflect.deleteProperty(subscribersMap, key);
   }
 
   // ****************************************************************
@@ -77,48 +71,29 @@ export default function createComponentStateStore(next) {
 
   function subscribe({ key, reducers, initialState }) {
     // compose unique store-key
-    let storeKey = getStateKey({key});
+    let storeKey = getStateKey(key);
 
-    // target stored state manager object
-    let stateManager = subscribersMap[storeKey];
-
-    // init component state for given key
-    if (!stateManager) {
-      stateManager = subscribersMap[storeKey] = {
-        reducersObj: {},
-        subscribers: [],
-        reducer: null
-      };
-    }
-
-    // create random uid for subscriber
-    let uid = randomUid(36);
-
-    // add subscriber listener to the list
-    stateManager.subscribers.push(uid);
-
-    // merge existent reducers with the new received in a map of available
-    // reducers
-    stateManager.reducersObj = { ...stateManager.reducersObj, ...reducers };
+    invariant(
+        !subscribersMap[storeKey],
+        `The redux componentStore with key: ${key} is already registered!`
+        );
 
     // create redux reducer function
-    stateManager.reducer = combineReducers(stateManager.reducersObj);
+    subscribersMap[storeKey] = combineReducers(reducers);
 
-    // if the subsribed component state is new, mount it on the redux store
-    if (!getState(storeKey)) {
-      store.dispatch({
-        type: STATE_ACTION,
-        subType: MOUNT,
-        key: storeKey,
-        state: initialState
-      });
-    }
+    // mount the new state on the redux store
+    store.dispatch({
+      type: STATE_ACTION,
+      subType: MOUNT,
+      key: storeKey,
+      state: initialState
+    });
 
     // return unsuscriber function
     return {
       storeKey,
       dispatch,
-      unsubscribe: unsubscribe.bind(null, storeKey, uid)
+      unsubscribe: unsubscribe.bind(null, storeKey)
     };
   }
 
@@ -175,7 +150,7 @@ export default function createComponentStateStore(next) {
       if (type === STATE_ACTION && subscribersMap[ key ]) {
         // react properly to component state actions
         let reaction = reactions[subType] || ( (currentState) => currentState );
-        reaction(tmpState, action, subscribersMap[key].reducer);
+        reaction(tmpState, action, subscribersMap[key]);
       }
 
       if (type === STATE_ACTION && tmpState[key]) {

@@ -1,13 +1,11 @@
-import React, { Component, PropTypes } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-
-function getDisplayName(Comp) {
-  return Comp.displayName || Comp.name || 'Component';
-}
+import React, {Component, PropTypes} from 'react';
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
+import {validateConfig, getDisplayName} from './utils';
 
 export default function reduxComponentState(componentStoreConfig) {
-  // TODO: add validation of shape fo the storeConfig
+  validateConfig(componentStoreConfig);
+
   return (DecoratedComponent) =>
     class ReduxComponentState extends Component {
 
@@ -25,19 +23,6 @@ export default function reduxComponentState(componentStoreConfig) {
           }).isRequired
         })
       };
-
-      // static propTypes = {
-      //   componentStoreConfig: PropTypes.shape({
-      //     getKey: PropTypes.func,
-      //     reducers: PropTypes.object,
-      //     getInitialState: PropTypes.func,
-      //
-      //     actions: Proptypes.shape( {
-      //        aggregate: Proptypes.string,
-      //        map: PropTypes.object
-      //     })
-      //   }).isRequired
-      // };
 
       constructor(props, context) {
         super(props, context);

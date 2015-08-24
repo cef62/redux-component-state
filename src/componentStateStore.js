@@ -81,7 +81,7 @@ export default function createComponentStateStore(next) {
     // return unsuscriber function
     return {
       storeKey,
-      dispatch,
+      dispatch: dispatch.bind(null, storeKey),
       unsubscribe: unsubscribe.bind(null, storeKey)
     };
   }

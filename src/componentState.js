@@ -21,9 +21,7 @@ export default function reduxComponentState(componentStoreConfig) {
       static contextTypes = {
         store: PropTypes.shape({
           componentState: PropTypes.shape({
-            subscribe: PropTypes.func,
-            unsubscribe: PropTypes.func,
-            getState: PropTypes.func
+            subscribe: PropTypes.func.isRequired
           }).isRequired
         })
       };
@@ -33,7 +31,6 @@ export default function reduxComponentState(componentStoreConfig) {
       //     getKey: PropTypes.func,
       //     reducers: PropTypes.object,
       //     getInitialState: PropTypes.func,
-      //     shared: PropTypes.bool,
       //
       //     actions: Proptypes.shape( {
       //        aggregate: Proptypes.string,
@@ -44,6 +41,7 @@ export default function reduxComponentState(componentStoreConfig) {
 
       constructor(props, context) {
         super(props, context);
+        this.dispatchLocal = this.dispatchLocal.bind(this);
       }
 
       // ****************************************************************
@@ -51,29 +49,19 @@ export default function reduxComponentState(componentStoreConfig) {
       // ****************************************************************
 
       componentWillMount() {
-        const {
-          getKey,
-          reducers,
-          getInitialState,
-          shared
-        } = componentStoreConfig;
+        const {getKey, reducers, getInitialState} = componentStoreConfig;
 
-        let initialState = (getInitialState || (() => undefined))(this.props);
-        let subscription = this.context.store.componentState.subscribe({
+        const initialState = (getInitialState || (() => undefined))(this.props);
+
+        const subscription = this.context.store.componentState.subscribe({
           key: getKey(this.props),
           reducers,
-          initialState,
-          shared
+          initialState
         });
         this.unsubscribe = subscription.unsubscribe;
-        this.storeKey = subscription.storeKey;
         this.dispatch = subscription.dispatch;
 
-        // REACT-REDUX CONNECT
-        function mapStateToProps(state) {
-          return {...state[subscription.storeKey]};
-        }
-        this.reduxConnectWrapper = connect(mapStateToProps)(DecoratedComponent);
+        this.ReduxConnectWrapper = this.createReduxConnector(subscription.storeKey);
       }
 
       componentWillUnmount() {
@@ -84,8 +72,15 @@ export default function reduxComponentState(componentStoreConfig) {
       // Internal API
       // ****************************************************************
 
-      dispatchLocal = (action) => {
-        return this.dispatch(this.storeKey, action);
+      createReduxConnector(key) {
+        function mapStateToProps(state) {
+          return Object.assign( {}, state[key] );
+        }
+        return connect(mapStateToProps)(DecoratedComponent);
+      }
+
+      dispatchLocal(action) {
+        return this.dispatch(action);
       }
 
       // ****************************************************************
@@ -98,9 +93,7 @@ export default function reduxComponentState(componentStoreConfig) {
         const {aggregate, map} = actions;
 
         let boundActionCreators;
-        if (map) {
-          boundActionCreators = bindActionCreators(map, this.dispatchLocal);
-        }
+        if (map) boundActionCreators = bindActionCreators(map, this.dispatchLocal);
 
         return this.composeChild(
             stuff,
@@ -123,7 +116,7 @@ export default function reduxComponentState(componentStoreConfig) {
           childProps = Object.assign( childProps, actions );
         }
 
-        return React.createElement(this.reduxConnectWrapper, childProps);
+        return React.createElement(this.ReduxConnectWrapper, childProps);
       }
     };
 }

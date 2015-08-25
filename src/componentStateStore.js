@@ -129,19 +129,20 @@ export default function createComponentStateStore(next) {
     const { key, type, subType } = action;
     const reducer = subscribersMap[key];
 
+    let tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
+      acc[storeKey] = (state || {})[storeKey];
+      return acc;
+    }, {});
+
     // test if the action received is bound to a component state
     if (type === STATE_ACTION && reducer) {
-      // create temporary state to be processed by specific component state
-      // reducers
-      let tmpState = { [key]: (state || {})[key] || {} };
+      tmpState[key] = tmpState[key] || {};
 
       // react properly to component state actions
       let reaction = reactions[subType] || ( (cs) => cs );
       reaction(tmpState, action, reducer);
-
-      newState[key] = tmpState[key];
     }
-
+    Object.assign(newState, tmpState);
     return newState;
   }
 

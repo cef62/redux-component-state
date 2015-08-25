@@ -1,5 +1,8 @@
 # redux-component-state
 
+[![Build Status](https://travis-ci.org/cef62/redux-component-state.svg?branch=master)](https://travis-ci.org/cef62/redux-component-state)
+[![npm version](https://img.shields.io/npm/v/redux-component-state.svg?style=flat-square)](https://www.npmjs.com/package/redux-component-state) 
+
 Component level state's manager using redux reducers to support on-demand store creation.
 
 This project is born to satisfy some requirement for an internal app. We needed  to create and destroy store fragments on-demand for some specific component. Initially we tried to define specific component reducers, registering them at application start. It worked fine but we not liked define component specific details at application level.

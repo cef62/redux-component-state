@@ -1,8 +1,16 @@
-import expect from 'expect';
-import { add } from '../src';
+import { expect } from 'chai';
+import reduxComponentState, { reduxComponentStateStore } from '../src';
 
-describe('add', () => {
-  it('should add 2 and 2', () => {
-    expect(add(2, 2)).toBe(4);
+describe('reduxComponentState', () => {
+  it('should exists and be a function', () => {
+    expect(reduxComponentState).to.exist;
+    expect(reduxComponentState).to.be.an.instanceof(Function);
+  });
+});
+
+describe('reduxComponentStateStore', () => {
+  it('should exists and be a function', () => {
+    expect(reduxComponentStateStore).to.exist;
+    expect(reduxComponentStateStore).to.be.an.instanceof(Function);
   });
 });

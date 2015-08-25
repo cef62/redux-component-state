@@ -39,7 +39,6 @@
     "eslint": "^0.23",
     "eslint-config-airbnb": "0.0.6",
     "eslint-plugin-react": "2.3.0",
-    "expect": "1.6.0",
     "isparta": "3.0.3",
     "mocha": "2.2.5",
     "mocha-better-spec-reporter": "^2.1.1",

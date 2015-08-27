@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 
 import reduxComponentState from 'redux-component-state';
 
-import * as actions from './redux/actions';
+import * as compActions from './redux/actions';
 import counter from './redux/counterReducer';
 
 class CounterPanel extends Component {
@@ -18,8 +18,7 @@ class CounterPanel extends Component {
   static defaultProps = {}
 
   render() {
-    const {compActions} = this.props;
-    const {increment, decrement} = compActions;
+    const {increment, decrement} = this.props.compActions;
 
     return (
         <div>
@@ -39,9 +38,6 @@ const componentStateConfig = {
     return `counter-${id}`;
   },
   reducers: {counter},
-  actions: {
-    map: actions,
-    aggregate: 'compActions'
-  }
+  actions: { compActions }
 };
 export default reduxComponentState(componentStateConfig)(CounterPanel);

@@ -7,7 +7,6 @@ import {
   KEY
 } from './actionTypes';
 
-import invariant from 'invariant';
 import validateSubscription from './utils/validateSubscription';
 
 export default function createComponentStateStore(next) {
@@ -66,10 +65,9 @@ export default function createComponentStateStore(next) {
     // compose unique store-key
     let storeKey = getStateKey(key);
 
-    invariant(
-        !subscribersMap[storeKey],
-        `The redux componentStore with key: ${key} is already registered!`
-        );
+    if (subscribersMap[storeKey]) {
+      throw new Error(`The redux componentStore with key: ${key} is already registered!`);
+    }
 
     // create redux reducer function
     subscribersMap[storeKey] = reducer;

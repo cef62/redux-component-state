@@ -1,17 +1,12 @@
 import React, {Component, PropTypes} from 'react';
-import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
-import {validateConfig, getDisplayName} from './utils';
+import {composeActionCreators, validateConfig, getDisplayName} from './utils';
 
 export default function reduxComponentState(componentStoreConfig) {
   validateConfig(componentStoreConfig);
 
   return (DecoratedComponent) =>
     class ReduxComponentState extends Component {
-
-      // ****************************************************************
-      // Component initialization
-      // ****************************************************************
 
       static displayName = `ReduxComponentState(${getDisplayName(DecoratedComponent)})`;
       static DecoratedComponent = DecoratedComponent;
@@ -24,17 +19,13 @@ export default function reduxComponentState(componentStoreConfig) {
         })
       };
 
-      // ****************************************************************
-      // Component LifeCycle
-      // ****************************************************************
-
       constructor(props, context) {
         super(props, context);
-        this.dispatchLocal = this.dispatchLocal.bind(this);
+        this.dispatchToState = this.dispatchToState.bind(this);
       }
 
       componentWillMount() {
-        const {getKey, reducers, getInitialState} = componentStoreConfig;
+        const {getKey, reducers, getInitialState, actions} = componentStoreConfig;
 
         const initialState = (getInitialState || (() => undefined))(this.props);
 
@@ -43,19 +34,16 @@ export default function reduxComponentState(componentStoreConfig) {
           reducers,
           initialState
         });
+
         this.unsubscribe = subscription.unsubscribe;
         this.dispatch = subscription.dispatch;
-
+        this.boundActionCreators = composeActionCreators(actions, subscription.dispatch);
         this.ReduxConnectWrapper = this.createReduxConnector(subscription.storeKey);
       }
 
       componentWillUnmount() {
         this.unsubscribe();
       }
-
-      // ****************************************************************
-      // Internal API
-      // ****************************************************************
 
       createReduxConnector(key) {
         function mapStateToProps(state) {
@@ -64,42 +52,18 @@ export default function reduxComponentState(componentStoreConfig) {
         return connect(mapStateToProps)(DecoratedComponent);
       }
 
-      dispatchLocal(action) {
+      dispatchToState(action) {
         return this.dispatch(action);
       }
 
-      // ****************************************************************
-      // Render component
-      // ****************************************************************
-
       render() {
-        const {...stuff} = this.props;
-        const {actions = {} } = componentStoreConfig;
-        const {aggregate, map} = actions;
-
-        let boundActionCreators;
-        if (map) boundActionCreators = bindActionCreators(map, this.dispatchLocal);
-
-        return this.composeChild(
-            stuff,
-            this.dispatchLocal,
-            boundActionCreators,
-            aggregate
+        let childProps = Object.assign( {},
+            this.props, {
+              ref: 'ReduxComponentStateConnector',
+              dispatchToState: this.dispatchToState
+            },
+            this.boundActionCreators
             );
-      }
-
-      composeChild(stuff, dispatch, actions, aggregate) {
-        let childProps = {
-          ...stuff,
-          ref: 'ReduxComponentStateWrapper',
-          dispatch
-        };
-
-        if (actions && aggregate) {
-          childProps[aggregate] = actions;
-        } else {
-          childProps = Object.assign( childProps, actions );
-        }
 
         return React.createElement(this.ReduxConnectWrapper, childProps);
       }

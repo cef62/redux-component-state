@@ -6,34 +6,22 @@ import { filterPrivateField } from './filters';
    getKey: PropTypes.func.isRequired,
    reducers: PropTypes.object.isRequired,
    getInitialState: PropTypes.func,
-
-   actions: Proptypes.shape( {
-   aggregate: Proptypes.string,
-   map: PropTypes.object.isRequired
-   })
+   actions: PropTypes.object
    };
    */
 export default function validateConfig(config) {
   const prefix = 'Redux Component State';
   invariant( config, `${prefix} requires a configuration object.`);
 
-  const { getKey, reducers, actions} = config;
+  const { getKey, reducer, actions} = config;
 
   invariant(
       typeof getKey === 'function',
       `${prefix} requires a getKey() function.`
       );
   invariant(
-      typeof reducers === 'object' && Object.keys(reducers),
-      `${prefix} requires a reducer map with at least one reducer.`
-      );
-  invariant(
-      Object.keys(reducers)
-      .filter(filterPrivateField)
-      .map(red => reducers[red])
-      .map(red => typeof red === 'function')
-      .every(red => red),
-      `${prefix} requires a reducer map where every key is a function`
+      typeof reducer === 'function',
+      `${prefix} expected the reducer to be a function.`
       );
   invariant(
       Object.keys(actions).length,

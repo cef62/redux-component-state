@@ -1,4 +1,3 @@
-import combineReducers from 'redux/lib/utils/combineReducers';
 import {
   STATE_ACTION,
   INIT,
@@ -62,7 +61,7 @@ export default function createComponentStateStore(next) {
   function subscribe(subscription) {
     validateSubscription(subscription);
 
-    const { key, reducers, initialState } = subscription;
+    const { key, reducer, initialState } = subscription;
 
     // compose unique store-key
     let storeKey = getStateKey(key);
@@ -73,7 +72,7 @@ export default function createComponentStateStore(next) {
         );
 
     // create redux reducer function
-    subscribersMap[storeKey] = combineReducers(reducers);
+    subscribersMap[storeKey] = reducer;
 
     // mount the new state on the redux store
     store.dispatch({

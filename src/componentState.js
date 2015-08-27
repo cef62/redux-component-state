@@ -25,13 +25,13 @@ export default function reduxComponentState(componentStoreConfig) {
       }
 
       componentWillMount() {
-        const {getKey, reducers, getInitialState, actions} = componentStoreConfig;
+        const {getKey, reducer, getInitialState, actions} = componentStoreConfig;
 
         const initialState = (getInitialState || (() => undefined))(this.props);
 
         const subscription = this.context.store.componentState.subscribe({
           key: getKey(this.props),
-          reducers,
+          reducer,
           initialState
         });
 

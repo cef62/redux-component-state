@@ -3,7 +3,7 @@ import React, { Component, PropTypes } from 'react';
 import reduxComponentState from 'redux-component-state';
 
 import * as compActions from './redux/actions';
-import counter from './redux/counterReducer';
+import CounterState from './redux/CounterState';
 
 class CounterPanel extends Component {
 
@@ -37,7 +37,7 @@ const componentStateConfig = {
     let id = props.id || 'defaultCounterPanel';
     return `counter-${id}`;
   },
-  reducers: {counter},
+  reducer: CounterState,
   actions: { compActions }
 };
 export default reduxComponentState(componentStateConfig)(CounterPanel);

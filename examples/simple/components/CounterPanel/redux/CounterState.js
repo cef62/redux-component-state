@@ -1,3 +1,4 @@
+import combineReducers from 'redux/lib/utils/combineReducers';
 import {
   INCREMENT,
   DECREMENT
@@ -14,7 +15,7 @@ function update({value, interactionCount}, action) {
   return { value: newValue, interactionCount: newInteractionCount };
 }
 
-export default function(state = initialState, action) {
+function counter(state = initialState, action) {
   let newState;
   switch (action.type) {
 
@@ -28,3 +29,6 @@ export default function(state = initialState, action) {
   }
   return newState;
 }
+
+const CounterState = combineReducers({ counter });
+export default CounterState;

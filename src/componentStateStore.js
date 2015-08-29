@@ -26,11 +26,21 @@ export default function createComponentStateStore(next) {
     return KEY + key;
   }
 
+  function getState(key) {
+    if (!subscribersMap[key]) {
+      throw new Error(`redux-component-state, trying to retrieve state for an unknown subscriber: ${key}`);
+    }
+    return store.getState()[key];
+  }
   // ****************************************************************
   // dispatch method for component state actions
   // ****************************************************************
 
   function dispatch(key, action) {
+    if (!subscribersMap[key]) {
+      throw new Error(`redux-component-state, trying to dispatch actions for an unknown subscriber: ${key}`);
+    }
+
     return store.dispatch({
       type: STATE_ACTION,
       subType: ACTION,
@@ -85,7 +95,7 @@ export default function createComponentStateStore(next) {
       storeKey,
       dispatch: dispatch.bind(null, storeKey),
       unsubscribe: unsubscribe.bind(null, storeKey),
-      getState: () => store.getState()[storeKey],
+      getState: getState.bind(null, storeKey),
     };
   }
 

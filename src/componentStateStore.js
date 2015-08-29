@@ -85,6 +85,7 @@ export default function createComponentStateStore(next) {
       storeKey,
       dispatch: dispatch.bind(null, storeKey),
       unsubscribe: unsubscribe.bind(null, storeKey),
+      getState: () => store.getState()[storeKey],
     };
   }
 

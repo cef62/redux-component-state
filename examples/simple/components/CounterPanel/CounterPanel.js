@@ -9,6 +9,7 @@ class CounterPanel extends Component {
 
   static propTypes = {
     compActions: PropTypes.object.isRequired,
+    getComponentState: PropTypes.func.isRequired,
     counter: PropTypes.shape({
       value: PropTypes.number.isRequired,
       interactionCount: PropTypes.number.isRequired,
@@ -18,12 +19,13 @@ class CounterPanel extends Component {
   static defaultProps = {}
 
   render() {
-    const {increment, decrement} = this.props.compActions;
+    const { compActions: actions, counter } = this.props;
+    const { increment, decrement } = actions;
 
     return (
         <div>
-          Current Count: {this.props.counter.value} <br/>
-          Number of interactions: {this.props.counter.interactionCount}
+          Current Count: {counter.value} <br/>
+          Number of interactions: {counter.interactionCount}
           <br/>
           <button onClick={ () => increment() }>increment</button>
           <button onClick={ () => decrement() }>decrement</button>

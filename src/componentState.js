@@ -29,20 +29,19 @@ export default function reduxComponentState(componentStoreConfig) {
 
         const initialState = (getInitialState || (() => undefined))(this.props);
 
-        const subscription = this.context.store.componentState.subscribe({
+        this.subscription = this.context.store.componentState.subscribe({
           key: getKey(this.props),
           reducer,
           initialState,
         });
 
-        this.unsubscribe = subscription.unsubscribe;
-        this.dispatch = subscription.dispatch;
-        this.boundActionCreators = composeActionCreators(actions, subscription.dispatch);
-        this.ReduxConnectWrapper = this.createReduxConnector(subscription.storeKey);
+        this.boundActionCreators = composeActionCreators(actions, this.subscription.dispatch);
+        this.ReduxConnectWrapper = this.createReduxConnector(this.subscription.storeKey);
       }
 
       componentWillUnmount() {
-        this.unsubscribe();
+        this.subscription.unsubscribe();
+        Reflect.deleteProperty(this, 'subscription');
       }
 
       createReduxConnector(key) {
@@ -53,7 +52,7 @@ export default function reduxComponentState(componentStoreConfig) {
       }
 
       dispatchToState(action) {
-        return this.dispatch(action);
+        return this.subscription.dispatch(action);
       }
 
       render() {
@@ -61,6 +60,7 @@ export default function reduxComponentState(componentStoreConfig) {
             this.props, {
               ref: 'ReduxComponentStateConnector',
               dispatchToState: this.dispatchToState,
+              getComponentState: this.subscription.getState,
             },
             this.boundActionCreators
             );

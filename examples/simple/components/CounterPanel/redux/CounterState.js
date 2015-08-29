@@ -18,14 +18,13 @@ function update({value, interactionCount}, action) {
 function counter(state = initialState, action) {
   let newState;
   switch (action.type) {
+  case INCREMENT:
+  case DECREMENT:
+    newState = update(state, action);
+    break;
 
-    case INCREMENT:
-    case DECREMENT:
-      newState = update(state, action);
-      break;
-
-    default:
-      newState = state;
+  default:
+    newState = state;
   }
   return newState;
 }

@@ -22,12 +22,12 @@ export function addTodoIfEmpty(text) {
 export function dispatchInMiddle(boundDispatchFn) {
   return {
     type: DISPATCH_IN_MIDDLE,
-    boundDispatchFn
+    boundDispatchFn,
   };
 }
 
 export function throwError() {
   return {
-    type: THROW_ERROR
+    type: THROW_ERROR,
   };
 }

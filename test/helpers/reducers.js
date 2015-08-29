@@ -12,7 +12,7 @@ export function todos(state = [], action) {
   case ADD_TODO:
     return [...state, {
       id: id(state),
-      text: action.text
+      text: action.text,
     }];
   default:
     return state;
@@ -24,7 +24,7 @@ export function todosReverse(state = [], action) {
   case ADD_TODO:
     return [{
       id: id(state),
-      text: action.text
+      text: action.text,
     }, ...state];
   default:
     return state;

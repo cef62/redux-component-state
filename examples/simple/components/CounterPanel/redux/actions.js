@@ -6,14 +6,14 @@ import {
 export function increment(multiplier = 1) {
   return {
     type: INCREMENT,
-    value: multiplier
+    value: multiplier,
   };
 }
 
 export function decrement(multiplier = 1) {
   return {
     type: DECREMENT,
-    value: (-multiplier)
+    value: (-multiplier),
   };
 }
 

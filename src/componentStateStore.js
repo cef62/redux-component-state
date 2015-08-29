@@ -11,7 +11,7 @@ import validateSubscription from './utils/validateSubscription';
 
 export default function createComponentStateStore(next) {
   // map of component state subscribers
-  let subscribersMap = {};
+  const subscribersMap = {};
 
   // redux store
   let store;
@@ -35,7 +35,7 @@ export default function createComponentStateStore(next) {
       type: STATE_ACTION,
       subType: ACTION,
       key: key,
-      data: action
+      data: action,
     });
   }
 
@@ -63,7 +63,7 @@ export default function createComponentStateStore(next) {
     const { key, reducer, initialState } = subscription;
 
     // compose unique store-key
-    let storeKey = getStateKey(key);
+    const storeKey = getStateKey(key);
 
     if (subscribersMap[storeKey]) {
       throw new Error(`The redux componentStore with key: ${key} is already registered!`);
@@ -77,14 +77,14 @@ export default function createComponentStateStore(next) {
       type: STATE_ACTION,
       subType: MOUNT,
       key: storeKey,
-      state: initialState
+      state: initialState,
     });
 
     // return unsuscriber function
     return {
       storeKey,
       dispatch: dispatch.bind(null, storeKey),
-      unsubscribe: unsubscribe.bind(null, storeKey)
+      unsubscribe: unsubscribe.bind(null, storeKey),
     };
   }
 
@@ -119,14 +119,14 @@ export default function createComponentStateStore(next) {
     [ACTION]: (state, action, reducer) => {
       state[action.key] = reducer(state[action.key], action.data);
       return state;
-    }
+    },
   };
 
   function applyComponentStateReducers(action, state, newState) {
     const { key, type, subType } = action;
     const reducer = subscribersMap[key];
 
-    let tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
+    const tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
       acc[storeKey] = (state || {})[storeKey];
       return acc;
     }, {});
@@ -136,7 +136,7 @@ export default function createComponentStateStore(next) {
       tmpState[key] = tmpState[key] || {};
 
       // react properly to component state actions
-      let reaction = reactions[subType] || ( (cs) => cs );
+      const reaction = reactions[subType] || ( (cs) => cs );
       reaction(tmpState, action, reducer);
     }
     Object.assign(newState, tmpState);
@@ -169,8 +169,8 @@ export default function createComponentStateStore(next) {
       ...store,
       replaceReducer: (reducerFunc) => store.replaceReducer(componentStateReducer(reducerFunc)),
       componentState: {
-        subscribe
-      }
+        subscribe,
+      },
     };
   };
 }

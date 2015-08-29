@@ -38,7 +38,7 @@ export default function validateConfig(config) {
         !topLevelItem.every( item => typeof item === 'function' )
         && !topLevelItem.every( item => {
           if (!isPlainObject(item)) return false;
-          let keys = Object.keys(item).filter(filterPrivateField);
+          const keys = Object.keys(item).filter(filterPrivateField);
           if (!keys.length) return false;
           return keys.every( sub => typeof item[sub] === 'function' );
         })

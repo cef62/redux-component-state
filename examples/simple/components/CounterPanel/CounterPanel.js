@@ -11,8 +11,8 @@ class CounterPanel extends Component {
     compActions: PropTypes.object.isRequired,
     counter: PropTypes.shape({
       value: PropTypes.number.isRequired,
-      interactionCount: PropTypes.number.isRequired
-    }).isRequired
+      interactionCount: PropTypes.number.isRequired,
+    }).isRequired,
   }
 
   static defaultProps = {}
@@ -34,10 +34,10 @@ class CounterPanel extends Component {
 
 const componentStateConfig = {
   getKey(props) {
-    let id = props.id || 'defaultCounterPanel';
+    const { id = 'defaultCounterPanel' } = props;
     return `counter-${id}`;
   },
   reducer: CounterState,
-  actions: { compActions }
+  actions: { compActions },
 };
 export default reduxComponentState(componentStateConfig)(CounterPanel);

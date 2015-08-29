@@ -1,5 +1,5 @@
 const initialState = {
-  name: 'Simple Component State'
+  name: 'Simple Component State',
 };
 
 export default function(state = initialState) {

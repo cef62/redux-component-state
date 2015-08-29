@@ -6,7 +6,7 @@ import {
 
 const initialState = {
   value: 0,
-  interactionCount: 0
+  interactionCount: 0,
 };
 
 function update({value, interactionCount}, action) {

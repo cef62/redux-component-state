@@ -5,5 +5,5 @@ import composeActionCreators from './composeActionCreators';
 export default {
   getDisplayName,
   validateConfig,
-  composeActionCreators
+  composeActionCreators,
 };

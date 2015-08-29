@@ -14,9 +14,9 @@ export default function reduxComponentState(componentStoreConfig) {
       static contextTypes = {
         store: PropTypes.shape({
           componentState: PropTypes.shape({
-            subscribe: PropTypes.func.isRequired
-          }).isRequired
-        })
+            subscribe: PropTypes.func.isRequired,
+          }).isRequired,
+        }),
       };
 
       constructor(props, context) {
@@ -32,7 +32,7 @@ export default function reduxComponentState(componentStoreConfig) {
         const subscription = this.context.store.componentState.subscribe({
           key: getKey(this.props),
           reducer,
-          initialState
+          initialState,
         });
 
         this.unsubscribe = subscription.unsubscribe;
@@ -57,10 +57,10 @@ export default function reduxComponentState(componentStoreConfig) {
       }
 
       render() {
-        let childProps = Object.assign( {},
+        const childProps = Object.assign( {},
             this.props, {
               ref: 'ReduxComponentStateConnector',
-              dispatchToState: this.dispatchToState
+              dispatchToState: this.dispatchToState,
             },
             this.boundActionCreators
             );

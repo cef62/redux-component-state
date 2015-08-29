@@ -24,9 +24,9 @@ export default function validateSubscription(subscription) {
 
   if (initialState) {
     const reducerStructure = reducer(undefined, {});
-    let requiredStates = Object.keys(reducerStructure).filter( red => !red.startsWith('_') );
-    let states = Object.keys(initialState).filter( prop => !prop.startsWith('_') );
-    let missingInitialStates = states.filter(
+    const requiredStates = Object.keys(reducerStructure).filter( red => !red.startsWith('_') );
+    const states = Object.keys(initialState).filter( prop => !prop.startsWith('_') );
+    const missingInitialStates = states.filter(
         st => !requiredStates.find( ref => ref === st ) );
 
     if (missingInitialStates.length) {

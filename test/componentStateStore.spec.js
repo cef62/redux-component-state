@@ -1,12 +1,13 @@
-import { expect, use } from 'chai';
+import { expect } from 'chai';
+// import { expect, use } from 'chai';
 // import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
+// import sinonChai from 'sinon-chai';
 import { createStore, combineReducers, compose } from 'redux';
 import { reduxComponentStateStore } from '../src';
 import { addTodo } from './helpers/actionCreators';
 import * as reducers from './helpers/reducers';
 
-use(sinonChai);
+// use(sinonChai);
 
 describe('reduxComponentStateStore', () => {
   let createFinalStore;

@@ -9,7 +9,7 @@ import appInfo from '../reducers/appInfo';
 import CounterPanel from './CounterPanel';
 
 const combinedReducers = combineReducers({ appInfo });
-const createFinalStore = compose( reduxComponentStateStore, createStore);
+const createFinalStore = compose(reduxComponentStateStore)(createStore);
 const store = createFinalStore(combinedReducers);
 
 export default class App extends Component {

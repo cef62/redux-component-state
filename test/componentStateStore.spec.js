@@ -8,7 +8,7 @@ import * as reducers from './helpers/reducers';
 const space = '  ';
 const setup = () => {
   // create redux store
-  const createFinalStore = compose( reduxComponentStateStore, createStore);
+  const createFinalStore = compose(reduxComponentStateStore)(createStore);
   const store = createFinalStore(combineReducers(reducers));
 
   // create redux reducer for component state
@@ -44,8 +44,8 @@ test(`.${space}should expose the public API`, ({equal, end}) => {
   const { store } = setup();
   const methods = Object.keys(store);
 
-  equal(methods.length, 6);
-  ['subscribe', 'dispatch', 'getState', 'getReducer', 'replaceReducer']
+  equal(methods.length, 5);
+  ['subscribe', 'dispatch', 'getState', 'replaceReducer']
     .forEach( key => equal(typeof store[key], 'function', `API missing: ${key}`) );
 
   equal(typeof store.componentState, 'object', `API missing: componentState`);

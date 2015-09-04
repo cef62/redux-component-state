@@ -2,9 +2,10 @@
    let subscriptiom = {
      key: PropTypes.string.isRequired,
      reducers: PropTypes.object.isRequired,
-    initialState: PropTypes.object
+     initialState: PropTypes.object,
+     middlewares: Proptypes.array,
    }
-   */
+*/
 export default function validateSubscription(subscription) {
   const prefix = 'Redux Component State Store Subscription';
 
@@ -12,7 +13,7 @@ export default function validateSubscription(subscription) {
     throw new Error(`${prefix} requires a subscription object.`);
   }
 
-  const { key, reducer, initialState } = subscription;
+  const { key, reducer, initialState, middlewares } = subscription;
 
   if (!key || typeof key !== 'string' || !key.length ) {
     throw new Error(`${prefix} requires a valid key identifier.`);
@@ -20,6 +21,10 @@ export default function validateSubscription(subscription) {
 
   if (typeof reducer !== 'function' ) {
     throw new Error(`${prefix} expected the reducer to be a function.`);
+  }
+
+  if (middlewares && !Array.isArray(middlewares)) {
+    throw new Error(`${prefix} expected middlewares to be an array.`);
   }
 
   if (initialState) {

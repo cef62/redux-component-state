@@ -5,7 +5,8 @@ import { filterPrivateField } from './filters';
    getKey: PropTypes.func.isRequired,
    reducers: PropTypes.object.isRequired,
    getInitialState: PropTypes.func,
-   actions: PropTypes.object
+   actions: PropTypes.object,
+   middlewares: Proptypes.array,
    };
    */
 export default function validateConfig(config) {
@@ -15,7 +16,7 @@ export default function validateConfig(config) {
     throw new Error(`${prefix} requires a configuration object.`);
   }
 
-  const { getKey, reducer, actions} = config;
+  const { getKey, reducer, actions, middlewares } = config;
 
   if (typeof getKey !== 'function' ) {
     throw new Error(`${prefix} requires a getKey() function.`);
@@ -23,6 +24,10 @@ export default function validateConfig(config) {
 
   if (typeof reducer !== 'function' ) {
     throw new Error(`${prefix} expected the reducer to be a function.`);
+  }
+
+  if (middlewares && !Array.isArray(middlewares)) {
+    throw new Error(`${prefix} expected middlewares to be an array.`);
   }
 
   if (actions) {

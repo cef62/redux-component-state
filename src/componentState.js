@@ -30,7 +30,7 @@ export default function reduxComponentState(componentStoreConfig) {
           reducer,
           getInitialState,
           actions,
-          middlewares = [],
+          middlewares,
         } = componentStoreConfig;
 
         const initialState = (getInitialState || (() => undefined))(this.props);

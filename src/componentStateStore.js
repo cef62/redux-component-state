@@ -6,7 +6,7 @@ import {
   ACTION,
   KEY
 } from './actionTypes';
-
+import { compose } from 'redux';
 import validateSubscription from './utils/validateSubscription';
 
 export default function createComponentStateStore(next) {
@@ -70,7 +70,7 @@ export default function createComponentStateStore(next) {
   function subscribe(subscription) {
     validateSubscription(subscription);
 
-    const { key, reducer, initialState } = subscription;
+    const { key, reducer, initialState, middlewares } = subscription;
 
     // compose unique store-key
     const storeKey = getStateKey(key);
@@ -81,6 +81,14 @@ export default function createComponentStateStore(next) {
 
     // create redux reducer function
     subscribersMap[storeKey] = reducer;
+
+    const middlewareAPI = {
+      getState: getState.bind(null, key),
+      dispatch: (action) => dispatch(action),
+    };
+    const chain = middlewares.map(middleware => middleware(middlewareAPI));
+    const componentStateDispatch = dispatch.bind(null, storeKey);
+    const enhancedDispatch = compose(...chain)(componentStateDispatch);
 
     // mount the new state on the redux store
     store.dispatch({
@@ -93,7 +101,7 @@ export default function createComponentStateStore(next) {
     // return unsuscriber function
     return {
       storeKey,
-      dispatch: dispatch.bind(null, storeKey),
+      dispatch: enhancedDispatch,
       unsubscribe: unsubscribe.bind(null, storeKey),
       getState: getState.bind(null, storeKey),
     };

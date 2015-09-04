@@ -25,7 +25,13 @@ export default function reduxComponentState(componentStoreConfig) {
       }
 
       componentWillMount() {
-        const {getKey, reducer, getInitialState, actions} = componentStoreConfig;
+        const {
+          getKey,
+          reducer,
+          getInitialState,
+          actions,
+          middlewares = [],
+        } = componentStoreConfig;
 
         const initialState = (getInitialState || (() => undefined))(this.props);
 
@@ -33,6 +39,7 @@ export default function reduxComponentState(componentStoreConfig) {
           key: getKey(this.props),
           reducer,
           initialState,
+          middlewares,
         });
 
         this.boundActionCreators = composeActionCreators(actions, this.subscription.dispatch);

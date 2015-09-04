@@ -3,12 +3,13 @@ import test from 'tape';
 import { createStore, combineReducers, compose } from 'redux';
 import { reduxComponentStateStore } from '../src';
 import { addTodo } from './helpers/actionCreators';
+import { testMiddleware } from './helpers/middleware';
 import * as reducers from './helpers/reducers';
 
 const space = '  ';
-const setup = () => {
+const setup = ({ globalMiddlewares = [], localMiddlewares = [] } = {}) => {
   // create redux store
-  const createFinalStore = compose(reduxComponentStateStore)(createStore);
+  const createFinalStore = compose(reduxComponentStateStore(...globalMiddlewares))(createStore);
   const store = createFinalStore(combineReducers(reducers));
 
   // create redux reducer for component state
@@ -19,6 +20,7 @@ const setup = () => {
   const minimalConfig = {
     key: '',
     reducer,
+    middlewares: localMiddlewares,
   };
   const completeConfig = Object.assign({}, minimalConfig, {
     initialState: {
@@ -27,6 +29,7 @@ const setup = () => {
         text: 're-hydratated todo',
       }],
     },
+    middlewares: localMiddlewares,
   });
   return {store, reducer, subscribe, minimalConfig, completeConfig};
 };
@@ -35,8 +38,16 @@ const setup = () => {
 test('reduxComponentStateStore', ({end}) => end() );
 
 test(`.${space}should be a function`, ({ok, equal, end}) => {
-  ok(reduxComponentStateStore, 'should exists');
+  ok(reduxComponentStateStore);
   equal(typeof reduxComponentStateStore, 'function');
+  end();
+});
+
+test(`.${space}should accept 0..n middlewares functions as arguments`, ({throws, doesNotThrow, end}) => {
+  throws( () => reduxComponentStateStore({}) );
+  throws( () => reduxComponentStateStore([testMiddleware]) );
+  doesNotThrow( () => reduxComponentStateStore(testMiddleware('fix')) );
+  doesNotThrow( () => reduxComponentStateStore(testMiddleware('fix'), testMiddleware('nix') ) );
   end();
 });
 
@@ -56,6 +67,7 @@ test(`.${space}should expose the public API`, ({equal, end}) => {
 
 test(`.${space}should require a valid configuration object`, ({throws, doesNotThrow, end}) => {
   const { subscribe, minimalConfig, completeConfig } = setup();
+
   throws( subscribe );
   throws( () => subscribe({}) );
   throws( () => subscribe({a: 33, b: 'temp'}) );
@@ -66,6 +78,14 @@ test(`.${space}should require a valid configuration object`, ({throws, doesNotTh
 
   completeConfig.key = 'keyB';
   doesNotThrow( () => subscribe(completeConfig) );
+
+  minimalConfig.key = 'keyC';
+  minimalConfig.middlewares = [testMiddleware('suffix')];
+  doesNotThrow( () => subscribe(minimalConfig) );
+
+  minimalConfig.key = 'keyD';
+  minimalConfig.middlewares = {};
+  throws( () => subscribe(minimalConfig) );
 
   Reflect.deleteProperty(completeConfig.initialState, 'todos');
   throws( () => subscribe(completeConfig) );
@@ -131,6 +151,62 @@ test(`.${space}${space}should create a new store populated with given initial st
   equal( todos.length, 1 );
   equal( todos[0].id, completeConfig.initialState.todos[0].id );
   equal( todos[0].text, completeConfig.initialState.todos[0].text );
+
+  end();
+});
+
+test(`.${space}${space}should support middlewares shared between all component states reducers`, ({equal, end}) => {
+  const suffix = ' tested';
+  const { subscribe, minimalConfig } = setup({
+    globalMiddlewares: [testMiddleware(suffix)],
+  });
+  const text = 'test todo';
+
+  minimalConfig.key = 'keyA';
+  const subscription = subscribe(minimalConfig);
+  subscription.dispatch(addTodo(text));
+
+  const todos = subscription.getState().todos;
+  equal( todos.length, 1 );
+  equal( todos[0].text, text + suffix );
+
+  end();
+});
+
+test(`.${space}${space}should support middlewares specific for a component state reducers`, ({equal, end}) => {
+  const suffix = ' tested';
+  const { subscribe, minimalConfig } = setup({
+    localMiddlewares: [testMiddleware(suffix)],
+  });
+  const text = 'test todo';
+
+  minimalConfig.key = 'keyA';
+  const subscription = subscribe(minimalConfig);
+  subscription.dispatch(addTodo(text));
+
+  const todos = subscription.getState().todos;
+  equal( todos.length, 1 );
+  equal( todos[0].text, text + suffix );
+
+  end();
+});
+
+test(`.${space}${space}should support middlewares both shared and specific for a component state reducers`, ({equal, end}) => {
+  const suffix = ' tested';
+  const globalSuffix = ' global';
+  const { subscribe, minimalConfig } = setup({
+    globalMiddlewares: [testMiddleware(globalSuffix)],
+    localMiddlewares: [testMiddleware(suffix)],
+  });
+  const text = 'test todo';
+
+  minimalConfig.key = 'keyA';
+  const subscription = subscribe(minimalConfig);
+  subscription.dispatch(addTodo(text));
+
+  const todos = subscription.getState().todos;
+  equal( todos.length, 1 );
+  equal( todos[0].text, text + globalSuffix + suffix );
 
   end();
 });

@@ -4,3 +4,12 @@ export function thunk({ dispatch, getState }) {
       action(dispatch, getState) :
       next(action);
 }
+
+export function testMiddleware(suffix) {
+  return () => next => action => {
+    action.text = action.text + suffix;
+    return next(action);
+  };
+}
+
+

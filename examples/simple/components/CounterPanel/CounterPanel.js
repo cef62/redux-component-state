@@ -4,6 +4,7 @@ import reduxComponentState from 'redux-component-state';
 
 import * as compActions from './redux/actions';
 import CounterState from './redux/CounterState';
+import LogMiddleware from './redux/LogMiddleware';
 
 class CounterPanel extends Component {
 
@@ -41,5 +42,6 @@ const componentStateConfig = {
   },
   reducer: CounterState,
   actions: { compActions },
+  middlewares: [ LogMiddleware ],
 };
 export default reduxComponentState(componentStateConfig)(CounterPanel);

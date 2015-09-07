@@ -6,6 +6,15 @@ import * as compActions from './redux/actions';
 import CounterState from './redux/CounterState';
 import LogMiddleware from './redux/LogMiddleware';
 
+/** By default mapStateToProps is not required. The default version
+ * mimics this example returning the private store slice.
+ * Can be used to pass more complex selectors to the component state
+ * COnnect instance.
+ */
+function defaultMapStateToProps(key) {
+  return (state) => Object.assign( {}, state[key] );
+}
+
 class CounterPanel extends Component {
 
   static propTypes = {
@@ -43,5 +52,6 @@ const componentStateConfig = {
   reducer: CounterState,
   actions: { compActions },
   middlewares: [ LogMiddleware ],
+  mapStateToProps: defaultMapStateToProps,
 };
 export default reduxComponentState(componentStateConfig)(CounterPanel);

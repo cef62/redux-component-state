@@ -2,6 +2,10 @@ import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import {composeActionCreators, validateConfig, getDisplayName} from './utils';
 
+function defaultMapStateToProps(key) {
+  return (state) => Object.assign( {}, state[key] );
+}
+
 export default function reduxComponentState(componentStoreConfig) {
   validateConfig(componentStoreConfig);
 
@@ -31,6 +35,7 @@ export default function reduxComponentState(componentStoreConfig) {
           getInitialState,
           actions,
           middlewares,
+          mapStateToProps,
         } = componentStoreConfig;
 
         const initialState = (getInitialState || (() => undefined))(this.props);
@@ -43,7 +48,7 @@ export default function reduxComponentState(componentStoreConfig) {
         });
 
         this.boundActionCreators = composeActionCreators(actions, this.subscription.dispatch);
-        this.ReduxConnectWrapper = this.createReduxConnector(this.subscription.storeKey);
+        this.ReduxConnectWrapper = this.createReduxConnector(this.subscription.storeKey, mapStateToProps);
       }
 
       componentWillUnmount() {
@@ -51,11 +56,8 @@ export default function reduxComponentState(componentStoreConfig) {
         Reflect.deleteProperty(this, 'subscription');
       }
 
-      createReduxConnector(key) {
-        function mapStateToProps(state) {
-          return Object.assign( {}, state[key] );
-        }
-        return connect(mapStateToProps)(DecoratedComponent);
+      createReduxConnector(key, mapStateToProps = defaultMapStateToProps) {
+        return connect( mapStateToProps(key) )(DecoratedComponent);
       }
 
       dispatchToState(action) {

@@ -93,8 +93,8 @@ export default function createComponentStateStore(...middlewares) {
       subscribersMap[storeKey] = reducer;
 
       const middlewareAPI = {
-        getState: getState.bind(null, key),
-        dispatch: (action) => dispatch(action),
+        getState: getState.bind(null, storeKey),
+        dispatch: (action) => dispatch(storeKey, action),
       };
 
       const chain = middlewares.concat(componentMiddlewares || [])

@@ -157,20 +157,30 @@ export default function createComponentStateStore(...middlewares) {
     function applyComponentStateReducers(action, state, newState) {
       const { key, type, subType } = action;
       const reducer = subscribersMap[key];
-
-      const tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
-        acc[storeKey] = (state || {})[storeKey];
-        return acc;
-      }, {});
+      let tmpState;
 
       // test if the action received is bound to a component state
       if (type === STATE_ACTION && reducer) {
+        tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
+          acc[storeKey] = (state || {})[storeKey];
+          return acc;
+        }, {});
+
         tmpState[key] = tmpState[key] || {};
 
         // react properly to component state actions
         const reaction = reactions[subType] || ( (cs) => cs );
         reaction(tmpState, action, reducer);
+      } else {
+        tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
+          const currState = state[storeKey];
+          if (currState) {
+            acc[storeKey] = subscribersMap[storeKey](currState, action);
+          }
+          return acc;
+        }, {});
       }
+
       Object.assign(newState, tmpState);
       return newState;
     }

@@ -1,6 +1,6 @@
 {
   "name": "redux-component-state",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Manage dynamic reducers specific for a component or a set of components",
   "main": "lib/index.js",
   "scripts": {

@@ -157,28 +157,41 @@ export default function createComponentStateStore(...middlewares) {
     function applyComponentStateReducers(action, state, newState) {
       const { key, type, subType } = action;
       const reducer = subscribersMap[key];
+      const isComponentStateAction = type === STATE_ACTION && reducer;
       let tmpState;
 
-      // test if the action received is bound to a component state
-      if (type === STATE_ACTION && reducer) {
-        tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
-          acc[storeKey] = (state || {})[storeKey];
-          return acc;
-        }, {});
+      tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
+        const source = state || {};
+        const currState = source[storeKey];
 
+        if (isComponentStateAction) {
+          acc[storeKey] = currState;
+        } else if (currState) {
+          const reduced = subscribersMap[storeKey](currState, action);
+          const changed = Object.keys(reduced).some( (sub) => currState[sub] !== reduced[sub] );
+          if (!changed) {
+            acc[storeKey] = currState;
+          } else if (reduced) {
+            acc[storeKey] = reduced;
+          }
+        }
+        return acc;
+      }, {});
+
+      if (isComponentStateAction) {
         tmpState[key] = tmpState[key] || {};
 
-        // react properly to component state actions
         const reaction = reactions[subType] || ( (cs) => cs );
         reaction(tmpState, action, reducer);
-      } else {
-        tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
-          const currState = state[storeKey];
-          if (currState) {
-            acc[storeKey] = subscribersMap[storeKey](currState, action);
+
+        const refState = state[key] || {};
+        const newTmpState = tmpState[key];
+        if (newTmpState) {
+          const stateChanged = Object.keys(newTmpState).some( (sub) => refState[sub] !== newTmpState[sub] );
+          if (!stateChanged) {
+            tmpState[key] = refState;
           }
-          return acc;
-        }, {});
+        }
       }
 
       Object.assign(newState, tmpState);

@@ -79,7 +79,7 @@ export default function createComponentStateStore(...middlewares) {
         key,
         reducer,
         initialState,
-        middlewares: componentMiddlewares,
+        middlewares: componentMiddlewares = [],
       } = subscription;
 
       // compose unique store-key
@@ -97,7 +97,7 @@ export default function createComponentStateStore(...middlewares) {
         dispatch: (action) => dispatch(storeKey, action),
       };
 
-      const chain = middlewares.concat(componentMiddlewares || [])
+      const chain = middlewares.concat(componentMiddlewares)
       .map(middleware => middleware(middlewareAPI));
 
       const componentStateDispatch = dispatch.bind(null, storeKey);
@@ -154,15 +154,14 @@ export default function createComponentStateStore(...middlewares) {
       },
     };
 
-    function applyComponentStateReducers(action, state, newState) {
+    function applyComponentStateReducers(action, state = {}, newState) {
       const { key, type, subType } = action;
       const reducer = subscribersMap[key];
       const isComponentStateAction = type === STATE_ACTION && reducer;
       let tmpState;
 
       tmpState = Object.keys(subscribersMap).reduce( (acc, storeKey) => {
-        const source = state || {};
-        const currState = source[storeKey];
+        const currState = state[storeKey];
 
         if (isComponentStateAction) {
           acc[storeKey] = currState;

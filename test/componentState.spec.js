@@ -1,3 +1,5 @@
+require('babel/polyfill');
+
 import test from 'tape';
 
 import reduxComponentState from '../src';
